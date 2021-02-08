@@ -27,8 +27,6 @@ class Stats_Middleware:
         obj.save()
         return response
 
-    def get_current_path(request):
-        print(request.get_full_path())
 
 
 
