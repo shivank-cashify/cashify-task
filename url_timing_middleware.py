@@ -23,8 +23,9 @@ class Stats_Middleware:
         response = self.get_response(request)
         response_dtime = datetime.now()
         duration = response_dtime - request_dtime
-        obj = UrlTiming(url = request.build_absolute_uri(),req_time = request_dtime,resp_time = response_dtime,resp_duration = duration.total_seconds(),username = request.user, )
-        obj.save()
+        if 'admin/' not in request.build_absolute_uri():
+            obj = UrlTiming(url = request.build_absolute_uri(),req_time = request_dtime,resp_time = response_dtime,resp_duration = duration.total_seconds(),username = request.user)
+            obj.save()
         return response
 
 
