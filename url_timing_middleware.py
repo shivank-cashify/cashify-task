@@ -23,7 +23,7 @@ class Stats_Middleware:
         response = self.get_response(request)
         response_dtime = datetime.now()
         duration = response_dtime - request_dtime
-        obj = UrlTiming(url = request.get_full_path(),req_time = request_dtime,resp_time = response_dtime,resp_duration = duration.total_seconds(),username = request.user, )
+        obj = UrlTiming(url = request.build_absolute_uri(),req_time = request_dtime,resp_time = response_dtime,resp_duration = duration.total_seconds(),username = request.user, )
         obj.save()
         return response
 
