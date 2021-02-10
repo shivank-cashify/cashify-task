@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.db import models
+from functools import wraps
 
 
 class UrlTiming(models.Model):
@@ -13,8 +14,19 @@ class UrlTiming(models.Model):
         managed = False
         db_table = 'url_timing'
 
+class flag:
+    pointer = 0
 
-class Stats_Middleware:
+def url_timing_decorator(func):
+    @wraps(func)
+    def inner(*args,**kwargs):
+        flag.pointer = 1
+        return func(*args,**kwargs)
+    return inner
+
+
+class Url_Stats_Middleware:
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -23,12 +35,14 @@ class Stats_Middleware:
         response = self.get_response(request)
         response_dtime = datetime.now()
         duration = response_dtime - request_dtime
-        if 'admin/' not in request.build_absolute_uri():
-            obj = UrlTiming(url = request.build_absolute_uri(),req_time = request_dtime,resp_time = response_dtime,resp_duration = duration.total_seconds(),username = request.user)
+        url_now = request.build_absolute_uri()
+        user_name = request.user
+        if flag.pointer == 1:
+            obj = UrlTiming(url=url_now, req_time=request_dtime, resp_time=response_dtime,
+                        resp_duration=duration.total_seconds(), username=user_name)
             obj.save()
+            flag.pointer = 0
         return response
-
-
 
 
 
