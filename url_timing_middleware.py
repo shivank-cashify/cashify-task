@@ -14,14 +14,23 @@ class UrlTiming(models.Model):
         managed = False
         db_table = 'url_timing'
 
-class flag:
+class Flag:
     pointer = 0
-    url_exception_list = ['http://127.0.0.1:8000/']    # This URl inserted for testing purpose - can remove if required.
+    url_exception_list = []  # Place here the rejection urls
+
+class Url_Test:
+    def __init__(self,url_requested):
+        self.url_requested = url_requested
+        urlobj = UrlTiming.objects.filter(url=self.url_requested)
+        if urlobj:
+            if self.url_requested not in Flag.url_exception_list:
+                Flag.url_exception_list.append(self.url_requested)
+
 
 def url_timing_decorator(func):
     @wraps(func)
     def inner(*args,**kwargs):
-        flag.pointer = 1
+        Flag.pointer = 1
         return func(*args,**kwargs)
     return inner
 
@@ -41,9 +50,15 @@ class Url_Stats_Middleware:
             user_name = request.user
         except:
             pass
-        if (flag.pointer == 1) and (url_now not in flag.url_exception_list):
+        if duration.total_seconds() > 1:
+            raise Exception(' Sorry The Url Requested is taking too long to load..... Contact Admin ')
+        Url_Test(url_now)
+        if (Flag.pointer == 1) and (url_now not in Flag.url_exception_list):
             obj = UrlTiming(url=url_now, req_time=request_dtime, resp_time=response_dtime,
                         resp_duration=duration.total_seconds(), username=user_name)
             obj.save()
-            flag.pointer = 0
+            Flag.pointer = 0
         return response
+
+
+
