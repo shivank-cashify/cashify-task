@@ -16,6 +16,7 @@ class UrlTiming(models.Model):
 
 class flag:
     pointer = 0
+    url_exception_list = ['http://127.0.0.1:8000/']    # This URl inserted for testing purpose - can remove if required.
 
 def url_timing_decorator(func):
     @wraps(func)
@@ -36,13 +37,13 @@ class Url_Stats_Middleware:
         response_dtime = datetime.now()
         duration = response_dtime - request_dtime
         url_now = request.build_absolute_uri()
-        user_name = request.user
-        if flag.pointer == 1:
+        try:
+            user_name = request.user
+        except:
+            pass
+        if (flag.pointer == 1) and (url_now not in flag.url_exception_list):
             obj = UrlTiming(url=url_now, req_time=request_dtime, resp_time=response_dtime,
                         resp_duration=duration.total_seconds(), username=user_name)
             obj.save()
             flag.pointer = 0
         return response
-
-
-
