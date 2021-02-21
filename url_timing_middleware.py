@@ -51,7 +51,7 @@ class Url_Stats_Middleware:
         except:
             pass
         if duration.total_seconds() > 1:
-            raise Exception(' Sorry The Url Requested is taking too long to load..... Contact Admin ')
+            raise Exception(' Sorry The Url Requested is taking too long to load..... Contact Admin ')  # It will give Error so if dont want to stop the server then comment it !
         Url_Test(url_now)
         if (Flag.pointer == 1) and (url_now not in Flag.url_exception_list):
             obj = UrlTiming(url=url_now, req_time=request_dtime, resp_time=response_dtime,
